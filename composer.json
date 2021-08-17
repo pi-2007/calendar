@@ -1,10 +1,10 @@
 {
-    "name": "kolab/calendar",
+    "name": "jodlidev/calendar",
     "type": "roundcube-plugin",
-    "description": "Calendar plugin",
+    "description": "Calendar plugin with CalDav",
     "homepage": "https://git.kolab.org/diffusion/RPK/",
     "license": "AGPLv3",
-    "version": "3.5.7",
+    "version": "3.5.7.1",
     "authors": [
         {
             "name": "Thomas Bruederli",
