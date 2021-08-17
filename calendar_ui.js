@@ -2891,7 +2891,7 @@ function rcube_calendar_ui(settings)
         calendar = { name:'', color:'cc0000', editable:true, showalarms:true };
 
       var title = rcmail.gettext((calendar.id ? 'editcalendar' : 'createcalendar'), 'calendar'),
-        params = {action: calendar.id ? 'form-edit' : 'form-new', c: {id: calendar.id}, _framed: 1},
+        params = {action: calendar.id ? 'form-edit' : 'form-new', c: {id: calendar.id}, driver: calendar.driver, _framed: 1},
         $dialog = $('<iframe>').attr('src', rcmail.url('calendar', params)).on('load', function() {
           var contents = $(this).contents();
           contents.find('#calendar-name')
@@ -2929,7 +2929,7 @@ function rcube_calendar_ui(settings)
             data.id = calendar.id;
 
           me.saving_lock = rcmail.set_busy(true, 'calendar.savingdata');
-          rcmail.http_post('calendar', { action:(calendar.id ? 'edit' : 'new'), c:data });
+            rcmail.http_post('calendar', { action:(calendar.id ? 'edit' : 'new'), c:data, driver: calendar.driver });
           $dialog.dialog("close");
         };
 
@@ -2950,7 +2950,7 @@ function rcube_calendar_ui(settings)
     {
       var label = calendar.children ? 'deletecalendarconfirmrecursive' : 'deletecalendarconfirm';
       rcmail.confirm_dialog(rcmail.gettext(label, 'calendar'), 'delete', function() {
-        rcmail.http_post('calendar', { action:'delete', c:{ id:calendar.id } });
+        rcmail.http_post('calendar', { action:'delete', c:{ id:calendar.id }, driver: calendar.driver });
         return true;
       });
 
@@ -3467,7 +3467,7 @@ function rcube_calendar_ui(settings)
       var brightness, select, id = cal.id;
 
       me.calendars[id] = $.extend({
-        url: rcmail.url('calendar/load_events', { source: id }),
+        url: rcmail.url('calendar/load_events', { source: id, driver: cal.driver }),
         id: id
       }, cal);
 
