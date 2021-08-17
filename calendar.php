@@ -36,6 +36,9 @@ class calendar extends rcube_plugin
     public $task = '?(?!logout).*';
     public $rc;
     public $lib;
+    private $_drivers = null;
+    private $_cals = null;
+    private $_cal_driver_map = null;
     public $resources_dir;
     public $home;  // declare public to be used in other classes
     public $urlbase;
@@ -50,6 +53,7 @@ class calendar extends rcube_plugin
         'calendar_work_start'   => 6,
         'calendar_work_end'     => 18,
         'calendar_agenda_range' => 60,
+        'calendar_agenda_sections' => 'smart',
         'calendar_show_weekno'  => 0,
         'calendar_first_day'    => 1,
         'calendar_first_hour'   => 6,
@@ -60,6 +64,9 @@ class calendar extends rcube_plugin
         'calendar_itip_send_option'    => 3,
         'calendar_itip_after_action'   => 0,
     ];
+
+    private $ical;
+    private $itip;
 
     // These are implemented with __get()
     //  private $ical;
@@ -182,6 +189,33 @@ class calendar extends rcube_plugin
                 if ($undo['ts'] < time() - $undo_time) {
                     $this->rc->session->remove('calendar_event_undo');
                     // @TODO: do EXPUNGE on kolab objects?
+                }
+            }
+
+
+
+
+
+
+            // loading preinstalled calendars
+            $preinstalled_calendars = $this->rc->config->get('calendar_preinstalled_calendars', FALSE);
+            if ($preinstalled_calendars && is_array($preinstalled_calendars)) {
+                 
+                // expanding both caldav url and user with RC (imap) username
+                foreach ($preinstalled_calendars as $index => $cal){
+                    $preinstalled_calendars[$index]['caldav_url'] = str_replace('%u', $this->rc->get_user_name(), $cal['caldav_url']); 
+                    $preinstalled_calendars[$index]['caldav_user'] = str_replace('%u', $this->rc->get_user_name(), $cal['caldav_user']);
+                }
+                
+                foreach ($this->get_drivers() as $driver_name => $driver) {
+                    foreach ($preinstalled_calendars as $cal) {
+                        if ($driver_name == $cal['driver']) {    
+                            if (!$driver->insert_default_calendar($cal)) {
+                                $error_msg = 'Unable to add default calendars' . ($driver && $driver->last_error ? ': ' . $driver->last_error :'');
+                                $this->rc->output->show_message($error_msg, 'error');
+                            }
+                        }
+                    }
                 }
             }
         }

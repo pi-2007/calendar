@@ -178,6 +178,8 @@ $labels['availbusy'] = 'Busy';
 $labels['availunknown'] = 'Unknown';
 $labels['availtentative'] = 'Tentative';
 $labels['availoutofoffice'] = 'Out of Office';
+$labels['delegatedto'] = 'Delegated to: ';
+$labels['delegatedfrom'] = 'Delegated from: ';
 $labels['scheduletime'] = 'Find availability';
 $labels['sendinvitations'] = 'Send invitations';
 $labels['sendnotifications'] = 'Notify participants about modifications';
@@ -296,6 +298,15 @@ $labels['birthdayage'] = 'Age $age';
 // history dialog
 $labels['objectchangelog'] = 'Change History';
 $labels['objectdiff'] = 'Changes from $rev1 to $rev2';
+$labels['revision'] = 'Revision';
+$labels['user'] = 'User';
+$labels['operation'] = 'Action';
+$labels['actionappend'] = 'Saved';
+$labels['actionmove'] = 'Moved';
+$labels['actiondelete'] = 'Deleted';
+$labels['compare'] = 'Compare';
+$labels['showrevision'] = 'Show this version';
+$labels['restore'] = 'Restore this version';
 $labels['objectnotfound'] = 'Failed to load event data';
 $labels['objectchangelognotavailable'] = 'Change history is not available for this event';
 $labels['objectdiffnotavailable'] = 'No comparison possible for the selected revisions';
@@ -317,4 +328,9 @@ $labels['arialabelresourcesearchform'] = 'Resources search form';
 $labels['arialabelresourceselection'] = 'Available resources';
 $labels['arialabeleventform'] = 'Event editing form';
 
+$labels['calendar_kolab'] = 'Kolab Calender';
+$labels['calendar_caldav'] = 'CalDAV Calender';
+$labels['calendar_ical'] = 'iCAL Calender';
+$labels['caldavurl'] = "CalDAV URL";
+$labels['icalurl'] = "iCal URL";
 ?>

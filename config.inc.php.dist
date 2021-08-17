@@ -25,8 +25,9 @@
  +-------------------------------------------------------------------------+
 */
 
-// backend type (database, kolab)
-$config['calendar_driver'] = "database";
+// backend type (database, kolab, caldav, ical)
+$config['calendar_driver'] = array("database", "caldav");
+$config['calendar_driver_default'] = "caldav";
 
 // default calendar view (agendaDay, agendaWeek, month)
 $config['calendar_default_view'] = "agendaWeek";
@@ -139,6 +140,14 @@ $config['kolab_invitation_calendars'] = false;
 // %i - Calendar UUID
 // $config['calendar_caldav_url'] = 'http://%h/iRony/calendars/%u/%i';
 
+// Crypt key to encrypt passwords for added iCAL/CalDAV calendars
+$config['calendar_crypt_key'] = "put some random string here";
+
+// Set to false to allow CURL to connect with SSL hosts that it can't verify the certificates from
+// e.g. for self-signed certificates.
+// technical note: This sets CURLOPT_SSL_VERIFYPEER _and_ CURLOPT_SSL_VERIFYHOST.
+$config['calendar_curl_secure_ssl'] = true;
+
 // Driver to provide a resource directory ('ldap' is the only implementation yet).
 // Leave empty or commented to disable resources support.
 // $config['calendar_resources_driver'] = 'ldap';
@@ -146,9 +155,34 @@ $config['kolab_invitation_calendars'] = false;
 // LDAP directory configuration to find avilable resources for events
 // $config['calendar_resources_directory'] = array(/* ldap_public-like address book configuration */);
 
+// Enable debugging output for iCAL/CalDAV drivers
+$config['calendar_caldav_debug'] = false;
+$config['calendar_ical_debug'] = false;
+
 // Enables displaying of free-busy URL with token-based authentication
 // Set it to the prefix URL, e.g. 'https://hostname/freebusy' or just '/freebusy'.
 // See freebusy_session_auth in configuration of kolab_auth plugin.
 $config['calendar_freebusy_session_auth_url'] = null;
+
+
+// Pre-installed calendars, added at first access to calendar section
+// Caldav driver is supported only
+// $config['calendar_preinstalled_calendars'] = array(
+//    'Caldav' => array(
+//                    'driver'      => 'caldav',
+//                    'caldav_user' => '%u',
+//                    'caldav_pass' => '%p',
+//                    'caldav_url'  => 'http://example.caldav.org/%u/calendar/',
+//                    'color'       => 'cccc00',
+//                    'showAlarms'  => 1),
+//    'Other' => array(
+//                    'driver'          => 'other',
+//                    'other_user'      => 'user@example.other.org',
+//                    'other_pass'      => 'password',
+//                    'other_url'       => 'http://example.other.org/user@example.other.org/other',
+//                    'color'           => 'cc0000',
+//                    'other_property1' => 'value1',
+//          		  'other_property2' => 'value2',
+//                    'showAlarms'      => 1));
 
 ?>
