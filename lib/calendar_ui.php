@@ -103,8 +103,29 @@ class calendar_ui
         $this->cal->register_handler('plugin.events_export_form', [$this, 'events_export_form']);
         $this->cal->register_handler('plugin.object_changelog_table', ['libkolab', 'object_changelog_table']);
         $this->cal->register_handler('plugin.searchform', [$this->rc->output, 'search_form']);
+        $this->cal->register_handler('plugin.calendar_create_menu', array($this, 'calendar_create_menu'));
 
         kolab_attachments_handler::ui();
+    }
+
+    /**
+     * Added for CalDav
+     * Handler for menu to choose the driver for calendar creation.
+     */
+    function calendar_create_menu($attrib = array())
+    {
+        $content = "";
+        foreach($this->cal->get_drivers() as $name => $driver)
+        {
+            $content .= html::tag('li', null, $this->rc->output->button(
+                array('label' => 'calendar.calendar_'.$name,
+                    'class' => 'active',
+                    'prop' => json_encode(array('driver' => $name)),
+                    'command' => 'calendar-create',
+                    'title' => 'calendar.createcalendar')));
+        }
+        
+        return $content;
     }
 
     /**
@@ -153,28 +174,30 @@ class calendar_ui
      */
     function calendar_css($attrib = [])
     {
-        $categories    = $this->cal->driver->list_categories();
-        $calendars     = $this->cal->driver->list_calendars();
-        $js_categories = [];
-
         $mode = $this->rc->config->get('calendar_event_coloring', $this->cal->defaults['calendar_event_coloring']);
-        $css  = "\n";
+        $css = "\n";
+        
+        foreach ($this->cal->get_drivers() as $driver) {
+            $categories = $driver->list_categories();
+            $calendars = $driver->list_calendars();
+            $js_categories = [];
 
-        foreach ((array) $categories as $class => $color) {
-            if (!empty($color)) {
-                $js_categories[$class] = $color;
-
-                $color = ltrim($color, '#');
-                $class = 'cat-' . asciiwords(strtolower($class), true);
-                $css  .= ".$class { color: #$color; }\n";
+            foreach((array)$categories as $class => $color) {
+                if(!empty($color)) {
+                    $js_categories[$class] = $color;
+            
+                    $color = ltrim($color, '#');
+                    $class = 'cat-' . asciiwords(strtolower($class), true);
+                    $css .= ".$class { color: #$color; }\n";
+                }
             }
-        }
 
-        $this->rc->output->set_env('calendar_categories', $js_categories);
+            $this->rc->output->set_env('calendar_categories', $js_categories);
 
-        foreach ((array) $calendars as $id => $prop) {
-            if (!empty($prop['color'])) {
-                $css .= $this->calendar_css_classes($id, $prop, $mode, $attrib);
+            foreach((array)$calendars as $id => $prop) {
+                if(!empty($prop['color'])) {
+                    $css .= $this->calendar_css_classes($id, $prop, $mode, $attrib);
+                }
             }
         }
 
@@ -211,7 +234,8 @@ class calendar_ui
         $html      = '';
         $jsenv     = [];
         $tree      = true;
-        $calendars = $this->cal->driver->list_calendars(0, $tree);
+        // TODO: Check whether get_calendars() exists. Original $calendars = $this->cal->driver->list_calendars(0, $tree);
+        $calendars = $this->cal->get_calendars(false, false, $tree);
 
         // walk folder tree
         if (is_object($tree)) {
@@ -296,12 +320,13 @@ class calendar_ui
         // enrich calendar properties with settings from the driver
         if (empty($prop['virtual'])) {
             unset($prop['user_id']);
+            $driver = $this->cal->get_driver_by_cal($id);
 
-            $prop['alarms']      = $this->cal->driver->alarms;
-            $prop['attendees']   = $this->cal->driver->attendees;
-            $prop['freebusy']    = $this->cal->driver->freebusy;
-            $prop['attachments'] = $this->cal->driver->attachments;
-            $prop['undelete']    = $this->cal->driver->undelete;
+            $prop['alarms']      = $driver->alarms;
+            $prop['attendees']   = $driver->attendees;
+            $prop['freebusy']    = $driver->freebusy;
+            $prop['attachments'] = $driver->attachments;
+            $prop['undelete']    = $driver->undelete;
             $prop['feedurl']     = $this->cal->get_url([
                     '_cal'   => $this->cal->ical_feed_hash($id) . '.ics',
                     'action' => 'feed'
@@ -434,7 +459,7 @@ class calendar_ui
 
         $select = new html_select($attrib);
 
-        foreach ((array) $this->cal->driver->list_calendars() as $id => $prop) {
+        foreach ((array) $this->cal->get_calendars() as $id => $prop) {
             if (
                 !empty($prop['editable'])
                 || (!empty($prop['rights']) && strpos($prop['rights'], 'i') !== false)
@@ -472,8 +497,10 @@ class calendar_ui
 
         $select = new html_select($attrib);
         $select->add('---', '');
-        foreach (array_keys((array) $this->cal->driver->list_categories()) as $cat) {
-              $select->add($cat, $cat);
+        foreach ($this->cal->get_drivers() as $driver) {
+            foreach(array_keys((array)$driver->list_categories()) as $cat) {
+                $select->add($cat, $cat);
+            }
         }
 
         return $select->show(null);
@@ -554,7 +581,14 @@ class calendar_ui
      */
     function alarm_select($attrib = [])
     {
-        return $this->cal->lib->alarm_select($attrib, $this->cal->driver->alarm_types, $this->cal->driver->alarm_absolute);
+        // Try GPC
+        $driver = $this->cal->get_driver_by_gpc(true /* quiet */);
+    
+        // We assume that each calendar has equal alarm types, so fallback to default calendar is ok.
+        if(!$driver)
+            $driver = $this->cal->get_default_driver();
+        
+        return $this->cal->lib->alarm_select($attrib, $driver->alarm_types, $driver->alarm_absolute);
     }
 
     /**
