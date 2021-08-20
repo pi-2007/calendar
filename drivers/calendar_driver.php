@@ -362,11 +362,11 @@ abstract class calendar_driver
     {
         $valid = true;
 
-        if (empty($event['start']) || !is_object($event['start']) || !is_a($event['start'], 'DateTime')) {
+        if (empty($event['start']) || !is_object($event['start']) || (!is_a($event['start'], 'DateTime') && !is_a($event['start'], 'DateTimeImmutable'))) {
             $valid = false;
         }
 
-        if (empty($event['end']) || !is_object($event['end']) || !is_a($event['end'], 'DateTime')) {
+        if (empty($event['end']) || !is_object($event['end']) || (!is_a($event['end'], 'DateTime') && !is_a($event['end'], 'DateTimeImmutable'))) {
             $valid = false;
         }
 

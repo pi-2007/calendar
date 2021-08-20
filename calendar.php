@@ -928,6 +928,18 @@ $("#rcmfd_new_category").keypress(function(event) {
         }
 
         switch ($action) {
+        case "new-source": //we "misuse" create_calendar() to stay compatible with other drivers
+            $cal['new-source'] = true;
+            $success = $this->driver->create_calendar($cal);
+            $reload  = true;
+            break;
+        case "delete-source": //we "misuse" delete_calendar() to stay compatible with other drivers
+            $cal['delete-source'] = true;
+            $success = $this->driver->delete_calendar($cal);
+            $reload  = true;
+            break;
+        case "form-source-new": //we "misuse" calendar_editform() to stay compatible with other drivers
+        case "form-source-delete": //we "misuse" calendar_editform() to stay compatible with other drivers
         case "form-new":
         case "form-edit":
             echo $this->ui->calendar_editform($action, $cal);

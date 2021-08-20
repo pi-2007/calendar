@@ -68,6 +68,10 @@
 <div id="calendaroptionsmenu" class="popupmenu" aria-hidden="true">
 	<h3 id="aria-label-calendaroptions" class="voice"><roundcube:label name="calendar.calendaractions" /></h3>
 	<ul id="calendaroptionsmenu-menu" class="toolbarmenu" role="menu" aria-labelledby="aria-label-calendaroptions">
+		<roundcube:if condition="env:calendar_driver == 'caldav'" />
+			<li role="menuitem"><roundcube:button type="link" command="calendar-sources-new" label="calendar.addsources" class="active" /></li>
+			<li role="menuitem"><roundcube:button type="link" command="calendar-sources-delete" label="calendar.deletesources" class="active" /></li>
+		<roundcube:endif />
 		<li role="menuitem"><roundcube:button type="link" command="calendar-edit" label="calendar.edit" classAct="active" /></li>
 		<li role="menuitem"><roundcube:button type="link" command="calendar-delete" label="delete" classAct="active" /></li>
 		<roundcube:if condition="env:calendar_driver == 'kolab'" />

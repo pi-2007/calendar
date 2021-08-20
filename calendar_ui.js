@@ -2884,6 +2884,64 @@ function rcube_calendar_ui(settings)
       return update_event_confirm('remove', event, { id:event.id, calendar:event.calendar, attendees:event.attendees });
     };
 
+    //opens a dialog to add caldav sources
+    this.calendar_new_source = function() {
+        var title = rcmail.gettext('addsources', 'calendar'),
+            params = {action: 'form-source-new', _framed: 1},
+            $dialog = $('<iframe>').attr('src', rcmail.url('calendar', params)),
+            save_func = function() {
+                var data,
+                    form = $dialog.contents().find('#calendarpropform');
+    
+                // form is not loaded
+                if (!form || !form.length)
+                    return false;
+    
+                // post data to server
+                data = form.serializeJSON();
+                if (data.color)
+                    data.color = data.color.replace(/^#/, '');
+                if (calendar.id)
+                    data.id = calendar.id;
+    
+                me.saving_lock = rcmail.set_busy(true, 'calendar.savingdata');
+                rcmail.http_post('calendar', { action:'new-source', c:data });
+                $dialog.dialog("close");
+            };
+    
+        rcmail.simple_dialog($dialog, title, save_func, {
+            width: 600,
+            height: 400
+        });
+    };
+    
+    //opens a dialog to delete caldav sources
+    this.calendar_delete_sources = function() {
+        var title = rcmail.gettext('deletesources', 'calendar'),
+            params = {action: 'form-source-delete', _framed: 1},
+            $dialog = $('<iframe>').attr('src', rcmail.url('calendar', params)),
+            save_func = function() {
+                var data,
+                    form = $dialog.contents().find('#calendarpropform');
+    
+                // form is not loaded
+                if (!form || !form.length)
+                    return false;
+    
+                // post data to server
+                data = form.serializeJSON();
+    
+                me.saving_lock = rcmail.set_busy(true, 'calendar.savingdata');
+                rcmail.http_post('calendar', { action:'delete-source', c:data });
+                $dialog.dialog("close");
+            };
+    
+        rcmail.simple_dialog($dialog, title, save_func, {
+            width: 600,
+            height: 400
+        });
+    };
+    
     // opens a jquery UI dialog with event properties (or empty for creating a new calendar)
     this.calendar_edit_dialog = function(calendar)
     {
@@ -4168,6 +4226,8 @@ window.rcmail && rcmail.addEventListener('init', function(evt) {
   rcmail.register_command('print', function(){ cal.print_calendars(); }, true);
 
   // configure list operations
+  rcmail.register_command('calendar-sources-add', cal.calendar_new_source, true);
+  rcmail.register_command('calendar-sources-delete', cal.calendar_delete_sources, true);
   rcmail.register_command('calendar-create', function(){ cal.calendar_edit_dialog(null); }, true);
   rcmail.register_command('calendar-edit', function(){ cal.calendar_edit_dialog(cal.calendars[cal.selected_calendar]); }, false);
   rcmail.register_command('calendar-remove', function(){ cal.calendar_remove(cal.calendars[cal.selected_calendar]); }, false);

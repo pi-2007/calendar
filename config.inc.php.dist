@@ -25,8 +25,12 @@
  +-------------------------------------------------------------------------+
 */
 
-// backend type (database, kolab)
-$config['calendar_driver'] = "database";
+// backend type (database, kolab, caldav)
+$config['calendar_driver'] = "caldav";
+
+// Enable debugging output for iCAL/CalDAV drivers
+$config['calendar_caldav_debug'] = false;
+$config['calendar_ical_debug'] = false;
 
 // default calendar view (agendaDay, agendaWeek, month)
 $config['calendar_default_view'] = "agendaWeek";

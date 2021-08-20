@@ -10,6 +10,10 @@
 
 $labels = array();
 
+//caldav driver
+$labels['addsources'] = 'Add external sources ';
+$labels['deletesources'] = 'Delete external sources ';
+
 // preferences
 $labels['default_view'] = 'Default view';
 $labels['time_format'] = 'Time format';

@@ -3,6 +3,7 @@
  *
  * @version @package_version@
  * @author Daniel Morlock <daniel.morlock@awesome-it.de>
+ * @author JodliDev <jodlidev@gmail.com>
  *
  * Copyright (C) Awesome IT GbR <info@awesome-it.de>
  *
@@ -20,23 +21,37 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+CREATE TABLE IF NOT EXISTS `caldav_sources` (
+  `source_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `user_id` int(10) UNSIGNED NOT NULL DEFAULT '0',
+
+  `caldav_url` varchar(255) NOT NULL,
+  `caldav_user` varchar(255) DEFAULT NULL,
+  `caldav_pass` varchar(1024) DEFAULT NULL,
+
+  PRIMARY KEY(`source_id`),
+  CONSTRAINT `fk_caldav_sources_user_id` FOREIGN KEY (`user_id`)
+  REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) /*!40000 ENGINE=INNODB */ /*!40101 CHARACTER SET utf8 COLLATE utf8_general_ci */;
+
 CREATE TABLE IF NOT EXISTS `caldav_calendars` (
   `calendar_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
   `user_id` int(10) UNSIGNED NOT NULL DEFAULT '0',
+  `source_id` int(10) UNSIGNED NOT NULL DEFAULT '0',
   `name` varchar(255) NOT NULL,
   `color` varchar(8) NOT NULL,
   `showalarms` tinyint(1) NOT NULL DEFAULT '1',
 
-  `caldav_url` varchar(255) NOT NULL,
   `caldav_tag` varchar(255) DEFAULT NULL,
-  `caldav_user` varchar(255) DEFAULT NULL,
-  `caldav_pass` varchar(1024) DEFAULT NULL,
+  `caldav_url` varchar(255) NOT NULL,
   `caldav_last_change` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   PRIMARY KEY(`calendar_id`),
   INDEX `caldav_user_name_idx` (`user_id`, `name`),
   CONSTRAINT `fk_caldav_calendars_user_id` FOREIGN KEY (`user_id`)
-  REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_caldav_calendars_sources` FOREIGN KEY (`source_id`)
+  REFERENCES `caldav_sources`(`source_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) /*!40000 ENGINE=INNODB */ /*!40101 CHARACTER SET utf8 COLLATE utf8_general_ci */;
 
 CREATE TABLE IF NOT EXISTS `caldav_events` (

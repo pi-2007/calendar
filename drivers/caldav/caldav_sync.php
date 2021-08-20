@@ -21,14 +21,10 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-require_once (dirname(__FILE__).'/../../lib/caldav-client.php');
+require_once 'caldav_client.php';
 
 class caldav_sync
 {
-    const ACTION_NONE = 1;
-    const ACTION_UPDATE = 2;
-    const ACTION_CREATE = 4;
-
     private $cal_id = null;
     private $ctag = null;
     private $username = null;
