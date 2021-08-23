@@ -31,6 +31,8 @@ class caldav_sync
     private $pass = null;
     private $url = null;
 
+    public $caldav = null;
+
     /**
      *  Default constructor for calendar synchronization adapter.
      *

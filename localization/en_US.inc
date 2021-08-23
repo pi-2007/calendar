@@ -11,8 +11,10 @@
 $labels = array();
 
 //caldav driver
-$labels['addsources'] = 'Add external sources ';
-$labels['deletesources'] = 'Delete external sources ';
+$labels['addsources'] = 'Add external sources';
+$labels['deletesources'] = 'Delete external sources';
+$labels['nosources_error'] = 'No external sources available.';
+$labels['source_notadded_error'] = 'External source could not be added.';
 
 // preferences
 $labels['default_view'] = 'Default view';

@@ -219,7 +219,7 @@ class caldav_driver extends calendar_driver
                 return false;
             }
 
-
+            $source['caldav_pass'] = $this->_decrypt_pass($source['caldav_pass']);
 
             $server_url = self::_encode_url($source['caldav_url']);
             $server_path = parse_url($server_url, PHP_URL_PATH);
@@ -227,12 +227,14 @@ class caldav_driver extends calendar_driver
             $path = "/calendars/$source[caldav_user]/$calId";
 
             self::debug_log("Creating new calendar \"$cal[name]\" with path $path at: " . $server_url);
-            $client = new caldav_client($server_url, $source["caldav_user"], $source["caldav_pass"]);
+            $client = new caldav_client($server_url, $source['caldav_user'], $source['caldav_pass']);
 
             if($client->create_calendar($server_path . $path, $cal['name'], isset($cal['color']) ? $cal['color'] : 'cc0000')) {
                 $calendars = $this->_autodiscover_calendars($source);
+
                 return $this->_add_calendars($calendars, $source);
             }
+            return false;
         }
     }
     private function _add_calendars($calendars, $source) {
@@ -277,8 +279,6 @@ class caldav_driver extends calendar_driver
 
     /**
      * Adds CalDAV source and loads adds all calendars from that source
-     *
-     * @see database_driver::create_calendar()
      */
     public function create_source($source)
     {
@@ -288,9 +288,11 @@ class caldav_driver extends calendar_driver
             $calendars = $this->_autodiscover_calendars($source);
         }
         catch(Exception $e) {
-            self::debug_log("Could not add source: $source");
+            self::debug_log($e);
+            $this->rc->output->show_message($this->cal->gettext('source_notadded_error'), 'error');
+            return false;
         }
-        if($calendars) {
+        if(count($calendars)) {
             $pass = isset($source['caldav_pass']) ? $this->_encrypt_pass($source['caldav_pass']) : null;
             $db_source_result = $this->rc->db->query(
                 "INSERT INTO " . $this->db_sources . "
@@ -415,7 +417,7 @@ class caldav_driver extends calendar_driver
             if(!$this->calendars[$prop['id']])
                 return false;
 
-            if(!$this->sync_clients[$prop['id']]->delete_calendar())
+            if(!$this->sync_clients[$prop['id']]->caldav->delete_calendar())
                 return false;
 
             $query = $this->rc->db->query(
@@ -1810,30 +1812,30 @@ class caldav_driver extends calendar_driver
     public function calendar_form($action, $calendar, $formfields)
     {
         switch($action) {
-        case "form-source-new":
+        case 'form-source-new':
             array_splice($formfields, 0);
 
             $input_caldav_url = new html_inputfield( array(
-                "name" => "caldav_url",
-                "id" => "caldav_url",
-                "size" => 20
+                'name' => 'caldav_url',
+                'id' => 'caldav_url',
+                'size' => 20
             ));
-            $formfields["caldav_url"] = array(
-                "label" => $this->cal->gettext("url"),
-                "value" => $input_caldav_url->show(null),
-                "id" => "caldav_url",
+            $formfields['caldav_url'] = array(
+                'label' => $this->cal->gettext('url'),
+                'value' => $input_caldav_url->show(null),
+                'id' => 'caldav_url',
             );
 
 
             $input_caldav_user = new html_inputfield( array(
-                "name" => "caldav_user",
-                "id" => "caldav_user",
-                "size" => 20
+                'name' => 'caldav_user',
+                'id' => 'caldav_user',
+                'size' => 20
             ));
-            $formfields["caldav_user"] = array(
-                "label" => $this->cal->gettext("username"),
-                "value" => $input_caldav_user->show(null),
-                "id" => "caldav_user",
+            $formfields['caldav_user'] = array(
+                'label' => $this->cal->gettext('username'),
+                'value' => $input_caldav_user->show(null),
+                'id' => 'caldav_user',
             );
 
 
@@ -1842,31 +1844,57 @@ class caldav_driver extends calendar_driver
                 "id" => "caldav_pass",
                 "size" => 20
             ));
-            $formfields["caldav_pass"] = array(
-                "label" => $this->cal->gettext("password"),
-                "value" => $input_caldav_pass->show(null),
-                "id" => "caldav_pass",
+            $formfields['caldav_pass'] = array(
+                'label' => $this->cal->gettext('password'),
+                'value' => $input_caldav_pass->show(null),
+                'id' => 'caldav_pass',
             );
             break;
-        case "form-source-delete":
+        case 'form-source-delete':
             array_splice($formfields, 0);
 
-            $result = $this->rc->db->query("SELECT source_id, caldav_url FROM ".$this->db_sources);
+            $result = $this->rc->db->query(
+                'SELECT source_id, caldav_url FROM '.$this->db_sources .' WHERE user_id = ?',
+                $this->rc->user->ID
+            );
             if($this->rc->db->num_rows($result)) {
                 for($i=0; $source = $this->rc->db->fetch_assoc($result); ++$i) {
                     $checkbox = new html_checkbox( array(
-                        "name" => "delete$i",
-                        "value" => $source['source_id']
+                        'name' => "delete$i",
+                        'value' => $source['source_id']
                     ));
 
                     $formfields[$source['source_id']] = array(
-                        "label" => $source['caldav_url'],
-                        "value" => $checkbox->show(null),
-                        "id" => "caldav_url",
+                        'label' => $source['caldav_url'],
+                        'value' => $checkbox->show(null),
+                        'id' => 'caldav_url',
                     );
                 }
             }
             break;
+        case 'form-new':
+            $result = $this->rc->db->query(
+                'SELECT source_id, caldav_url FROM '.$this->db_sources .' WHERE user_id = ?',
+                $this->rc->user->ID
+            );
+            if($this->rc->db->num_rows($result)) {
+                $select = new html_select([
+                    'name' => 'source_id',
+                    'id' => 'caldav_url'
+                ]);
+                while($source = $this->rc->db->fetch_assoc($result)) {
+                    $select->add($source['caldav_url'], $source['source_id']);
+                }
+                $formfields['source_id'] = array(
+                    'label' => $this->cal->gettext('url'),
+                    'value' => $select->show(null),
+                    'id' => 'caldav_url',
+                );
+            }
+            else {
+                $this->rc->output->show_message($this->cal->gettext('nosources_error'), 'error');
+                return null;
+            }
         }
 
 
@@ -1899,7 +1927,7 @@ class caldav_driver extends calendar_driver
      *    caldav_url: Absolute URL to CalDAV server
      *   caldav_user: Username
      *   caldav_pass: Password
-     * @return False on error or an array with the following calendar props:
+     * @return array (empty on error) with the following calendar props:
      *    name: Calendar display name
      *    href: Absolute calendar URL
      */
@@ -1919,7 +1947,7 @@ class caldav_driver extends calendar_driver
         $response = $caldav->prop_find($caldav_url, array_merge($current_user_principal,$cal_attribs), 0);
         if (!$response) {
             $this->_raise_error("Resource \"$caldav_url\" has no collections");
-            return false;
+            return [];
         }
         else if (array_key_exists ('{DAV:}resourcetype', $response) &&
             $response['{DAV:}resourcetype'] instanceof Sabre\DAV\Xml\Property\ResourceType &&
@@ -1944,7 +1972,7 @@ class caldav_driver extends calendar_driver
         $response = $caldav->prop_find($caldav_url, $calendar_home_set, 0);
         if (!$response) {
             $this->_raise_error("Resource \"$caldav_url\" contains no calendars.");
-            return false;
+            return [];
         }
 //        $caldav_url = $base_uri . $response[$calendar_home_set[0]]; //### I guess this was the format that "OldSabre" in the original library used
         $caldav_url = $base_uri . $response[$calendar_home_set[0]][0]['value'];
@@ -1968,21 +1996,24 @@ class caldav_driver extends calendar_driver
                 }
                 else if ($key == '{http://apple.com/ns/ical/}calendar-color') {
                     //Thanks to https://github.com/agendav/agendav/blob/10397b6c04a52acd6cb9528683f9e167d516cdb5/web/src/CalDAV/Resource/Calendar.php#L264
-                    if (strlen($value) === 7) {
-                        return $value . 'ff';
-                    }
-
-                    if (strlen($value) === 4) {
+                    switch(strlen($value)) {
+                    case 4:
                         preg_match('/#(.)(.)(.)/', $value, $matches);
-                        return '#' .
-                            $matches[1] .$matches[1] .
+                        $color = $matches[1] .$matches[1] .
                             $matches[2] .$matches[2] .
                             $matches[3] .$matches[3] .
                             'ff';
+                        break;
+                    case 7:
+                        $color = substr($value, 1) . 'ff';
+                        break;
+                    case 9:
+                        $color = substr($value, 1);
+                        break;
                     }
-
                 }
             }
+            rcmail::console(print_r($attribs, true));
             if ($found) {
                 array_push($calendars, array(
                     'name' => $name,

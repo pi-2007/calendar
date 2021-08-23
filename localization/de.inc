@@ -8,6 +8,8 @@
  */
 $labels['addsources'] = 'Externe Quellen hinzufügen ';
 $labels['deletesources'] = 'Externe Quellen löschen ';
+$labels['nosources_error'] = 'Keine externen Quellen vorhanden.';
+$labels['source_notadded_error'] = 'Externe Quelle konnte nicht hinzugefügt werden.';
 $labels['default_view'] = 'Standardansicht';
 $labels['time_format'] = 'Zeitformatierung';
 $labels['timeslots'] = 'Zeitfenster pro Stunde';
