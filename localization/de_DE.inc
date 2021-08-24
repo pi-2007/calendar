@@ -6,10 +6,12 @@
  *
  * For translation see https://www.transifex.com/projects/p/kolab/resource/calendar/
  */
-$labels['addsources'] = 'Externe Quellen hinzufügen';
-$labels['deletesources'] = 'Externe Quellen löschen';
-$labels['nosources_error'] = 'Keine externen Quellen vorhanden.';
-$labels['source_notadded_error'] = 'Externe Quelle konnte nicht hinzugefügt werden.';
+$labels['addsources'] = 'CalDAV Quellen hinzufügen';
+$labels['deletesources'] = 'CalDAV Quellen löschen';
+$labels['nosources_error'] = 'Keine CalDAV Quellen vorhanden.';
+$labels['source_notadded_error'] = 'CalDAV Quelle konnte nicht hinzugefügt werden.';
+$labels['calendar_is_ical'] = 'Ist ics-Datei';
+
 $labels['default_view'] = 'Standardansicht';
 $labels['time_format'] = 'Zeitformatierung';
 $labels['timeslots'] = 'Zeitfenster pro Stunde';

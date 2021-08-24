@@ -1,10 +1,9 @@
 /**
  * CalDAV Client
+ * (not tested & automatically generated from mysql)
  *
  * @version @package_version@
- * @author Hugo Slabbert <hugo@slabnet.com>
- *
- * Copyright (C) 2014, Hugo Slabbert <hugo@slabnet.com>
+ * @author JodliDev <jodlidev@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as
@@ -20,32 +19,107 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-CREATE TYPE caldav_type AS ENUM ('vcal','vevent','vtodo','');
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE caldav_sources_seq;
 
-CREATE TABLE IF NOT EXISTS caldav_props (
-  obj_id int NOT NULL,
-  obj_type caldav_type NOT NULL,
-  url varchar(255) NOT NULL,
-  tag varchar(255) DEFAULT NULL,
-  username varchar(255) DEFAULT NULL,
-  pass varchar(1024) DEFAULT NULL,
-  last_change timestamp without time zone DEFAULT now() NOT NULL,
-  PRIMARY KEY (obj_id, obj_type)
-);
+CREATE TABLE IF NOT EXISTS caldav_sources (
+                                              source_id int CHECK (source_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_sources_seq'),
+    user_id int CHECK (user_id > 0) NOT NULL DEFAULT '0',
 
-CREATE OR REPLACE FUNCTION upd_timestamp() RETURNS TRIGGER 
-LANGUAGE plpgsql
-AS
-$$
-BEGIN
-    NEW.last_change = CURRENT_TIMESTAMP;
-    RETURN NEW;
-END;
-$$;
+    caldav_url varchar(1024) NOT NULL,
+    caldav_user varchar(255) DEFAULT NULL,
+    caldav_pass varchar(1024) DEFAULT NULL,
 
-CREATE TRIGGER update_timestamp
-  BEFORE INSERT OR UPDATE
-  ON caldav_props
-  FOR EACH ROW
-  EXECUTE PROCEDURE upd_timestamp();
+    PRIMARY KEY(source_id),
+    CONSTRAINT fk_caldav_sources_user_id FOREIGN KEY (user_id)
+    REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE
+    ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
 
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE caldav_calendars_seq;
+
+CREATE TABLE IF NOT EXISTS caldav_calendars (
+                                                calendar_id int CHECK (calendar_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_calendars_seq'),
+    user_id int CHECK (user_id > 0) NOT NULL DEFAULT '0',
+    source_id int CHECK (source_id > 0) NOT NULL DEFAULT '0',
+    name varchar(255) NOT NULL,
+    color varchar(8) NOT NULL,
+    showalarms smallint NOT NULL DEFAULT '1',
+
+    caldav_tag varchar(255) DEFAULT NULL,
+    caldav_url varchar(1024) NOT NULL,
+    caldav_last_change timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_ical smallint NOT NULL DEFAULT '0',
+    ical_user varchar(255) DEFAULT NULL,
+    ical_pass varchar(1024) DEFAULT NULL,
+
+    PRIMARY KEY(calendar_id)
+    ,
+    CONSTRAINT fk_caldav_calendars_user_id FOREIGN KEY (user_id)
+    REFERENCES users(user_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    CONSTRAINT fk_caldav_calendars_sources FOREIGN KEY (source_id)
+    REFERENCES caldav_sources(source_id) ON DELETE CASCADE ON UPDATE CASCADE
+    ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
+
+CREATE INDEX caldav_user_name_idx ON caldav_calendars (user_id, name);
+
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE caldav_events_seq;
+
+CREATE TABLE IF NOT EXISTS caldav_events (
+    event_id int CHECK (event_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_events_seq'),
+    calendar_id int CHECK (calendar_id > 0) NOT NULL DEFAULT '0',
+    recurrence_id int CHECK (recurrence_id > 0) NOT NULL DEFAULT '0',
+    uid varchar(255) NOT NULL DEFAULT '',
+    instance varchar(16) NOT NULL DEFAULT '',
+    isexception smallint NOT NULL DEFAULT '0',
+    created timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
+    changed timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
+    sequence int CHECK (sequence > 0) NOT NULL DEFAULT '0',
+    start timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
+    end timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
+    recurrence varchar(255) DEFAULT NULL,
+    title varchar(255) NOT NULL,
+    description text NOT NULL,
+    location varchar(255) NOT NULL DEFAULT '',
+    categories varchar(255) NOT NULL DEFAULT '',
+    url varchar(255) NOT NULL DEFAULT '',
+    all_day smallint NOT NULL DEFAULT '0',
+    free_busy smallint NOT NULL DEFAULT '0',
+    priority smallint NOT NULL DEFAULT '0',
+    sensitivity smallint NOT NULL DEFAULT '0',
+    status varchar(32) NOT NULL DEFAULT '',
+    alarms text NULL DEFAULT NULL,
+    attendees text DEFAULT NULL,
+    notifyat timestamp(0) DEFAULT NULL,
+
+    caldav_url varchar(255) NOT NULL,
+    caldav_tag varchar(255) DEFAULT NULL,
+    caldav_last_change timestamp(0) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY(event_id)
+    ,
+    CONSTRAINT fk_caldav_events_calendar_id FOREIGN KEY (calendar_id)
+    REFERENCES caldav_calendars(calendar_id) ON DELETE CASCADE ON UPDATE CASCADE
+    ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
+
+CREATE INDEX caldav_uid_idx ON caldav_events (uid);
+CREATE INDEX caldav_recurrence_idx ON caldav_events (recurrence_id);
+CREATE INDEX caldav_calendar_notify_idx ON caldav_events (calendar_id,notifyat);
+
+-- SQLINES LICENSE FOR EVALUATION USE ONLY
+CREATE SEQUENCE caldav_attachments_seq;
+
+CREATE TABLE IF NOT EXISTS caldav_attachments (
+                                                  attachment_id int CHECK (attachment_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_attachments_seq'),
+    event_id int CHECK (event_id > 0) NOT NULL DEFAULT '0',
+    filename varchar(255) NOT NULL DEFAULT '',
+    mimetype varchar(255) NOT NULL DEFAULT '',
+    size int NOT NULL DEFAULT '0',
+    data TEXT NOT NULL,
+    PRIMARY KEY(attachment_id),
+    CONSTRAINT fk_caldav_attachments_event_id FOREIGN KEY (event_id)
+    REFERENCES caldav_events(event_id) ON DELETE CASCADE ON UPDATE CASCADE
+    ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
+
+REPLACE INTO `system` (name, value) SELECT ('calendar-caldav-version', '2021082400');

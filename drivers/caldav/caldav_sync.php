@@ -4,6 +4,7 @@
  *
  * @version @package_version@
  * @author Daniel Morlock <daniel.morlock@awesome-it.de>
+ * @author JodliDev <jodlidev@gmail.com>
  *
  * Copyright (C) Awesome IT GbR <info@awesome-it.de>
  *
@@ -22,8 +23,9 @@
  */
 
 require_once 'caldav_client.php';
+require_once 'Isync.php';
 
-class caldav_sync
+class caldav_sync implements Isync
 {
     private $cal_id = null;
     private $ctag = null;
@@ -67,7 +69,7 @@ class caldav_sync
      * Determines whether current calendar needs to be synced
      * regarding the CalDAV ctag.
      *
-     * @return True if the current calendar ctag differs from the CalDAV tag which
+     * @return boolean True if the current calendar ctag differs from the CalDAV tag which
      *         indicates that there are changes that must be synched. Returns false
      *         if the calendar is up to date, no sync necesarry.
      */
@@ -177,7 +179,7 @@ class caldav_sync
     /**
      * Fetches event data and attaches it to the given update properties.
      *
-     * @param $updates List of update properties.
+     * @param $updates array of update properties.
      * @return array List of update properties with additional key "remote_event" containing the current caldav event.
      */
     private function _get_event_data($updates)
@@ -208,7 +210,7 @@ class caldav_sync
      * Creates the given event on the CalDAV server.
      *
      * @param array Hash array with event properties.
-     * @return Event with updated "caldav_url" and "caldav_tag" attributes, false on error.
+     * @return array with updated "caldav_url" and "caldav_tag" attributes, null on error.
      */
     public function create_event($event)
     {
@@ -220,7 +222,8 @@ class caldav_sync
         caldav_driver::debug_log("Push new event to url ".$props["caldav_url"]);
         $result = $this->caldav->put_event($props["caldav_url"], $event);
 
-        if($result == false || $result < 0) return false;
+        if($result == false || $result < 0)
+            return null;
         return array_merge($event, $props);
     }
 
@@ -228,7 +231,7 @@ class caldav_sync
      * Updates the given event on the CalDAV server.
      *
      * @param array Hash array with event properties to update, must include "uid", "caldav_url" and "caldav_tag".
-     * @return True on success, false on error, -1 if the given event/etag is not up to date.
+     * @return boolean True on success, false on error, -1 if the given event/etag is not up to date.
      */
     public function update_event($event)
     {
@@ -240,7 +243,7 @@ class caldav_sync
      * Removes the given event from the caldav server.
      *
      * @param array Hash array with events properties, must include "caldav_url".
-     * @return True on success, false on error.
+     * @return boolean True on success, false on error.
      */
     public function remove_event($event)
     {
