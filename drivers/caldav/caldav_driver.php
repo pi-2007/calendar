@@ -137,20 +137,22 @@ class caldav_driver extends calendar_driver
                 $arr['name'] = html::quote($arr['name']);
                 $arr['listname'] = html::quote($arr['name']);
                 $arr['rights'] = 'lrswikxteav';
-                $arr['editable'] = true;
                 $arr['caldav_pass'] = $this->_decrypt_pass($arr['caldav_pass']);
-                $this->calendars[$arr['id']] = $arr;
-                $calendar_ids[] = $this->rc->db->quote($arr['id']);
 
                 if($arr['is_ical']) {
                     $this->sync_clients[$arr['id']] = new ical_sync($arr);
-                    $cal["readonly"] = true;
-                    $cal["deletable"] = true;
-                    $cal["editable_name"] = true;
+                    $arr["readonly"] = true;
+                    $arr["editable"] = false;
+                    $arr["deletable"] = true;
+                    $arr["editable_name"] = true;
                 }
                 else {
+                    $arr['editable'] = true;
                     $this->sync_clients[$arr['id']] = new caldav_sync($arr);
                 }
+
+                $this->calendars[$arr['id']] = $arr;
+                $calendar_ids[] = $this->rc->db->quote($arr['id']);
             }
             $this->calendar_ids = join(',', $calendar_ids);
         }
@@ -1573,7 +1575,12 @@ class caldav_driver extends calendar_driver
      */
     private function add_attachment($attachment, $event_id)
     {
-        $data = $attachment['data'] ? $attachment['data'] : file_get_contents($attachment['path']);
+        if (isset($attachment['data']))
+	    $data = $attachment['data'];
+	elseif (isset($attachment['path']) && $attachment['path'] != '')
+	    $data = file_get_contents($attachment['path']);
+	else
+	    return 0;
 
         $query = $this->rc->db->query(
             "INSERT INTO " . $this->db_attachments .
@@ -2052,7 +2059,6 @@ else {
                     }
                 }
             }
-            rcmail::console(print_r($attribs, true));
             if ($found) {
                 array_push($calendars, array(
                     'name' => $name,
