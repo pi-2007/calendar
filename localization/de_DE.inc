@@ -8,9 +8,8 @@
  */
 $labels['addsources'] = 'CalDAV Quellen hinzufügen';
 $labels['deletesources'] = 'CalDAV Quellen löschen';
-$labels['nosources_error'] = 'Keine CalDAV Quellen vorhanden.';
 $labels['source_notadded_error'] = 'CalDAV Quelle konnte nicht hinzugefügt werden.';
-$labels['calendar_is_ical'] = 'Ist ics-Datei';
+$labels['calendar_ical_file'] = 'ics-Datei';
 
 $labels['default_view'] = 'Standardansicht';
 $labels['time_format'] = 'Zeitformatierung';

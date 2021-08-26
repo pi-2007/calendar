@@ -193,7 +193,6 @@ class caldav_driver extends calendar_driver
                     'active'        => !in_array($id, $hidden),
                     'group'         => 'x-birthdays',
                     'editable'      => false,
-                    'editable_name' => true,
                     'default'       => false,
                     'children'      => false,
                 );
@@ -1898,11 +1897,11 @@ class caldav_driver extends calendar_driver
                 'SELECT source_id, caldav_url FROM '.$this->db_sources .' WHERE user_id = ?',
                 $this->rc->user->ID
             );
+            $sources_exist = $this->rc->db->num_rows($result);
             if($this->rc->db->num_rows($result)) {
                 $is_ical = new html_checkbox( array(
                     'name' => "is_ical",
                     'value' => 1,
-                    'onload' => 'alert(123)',
                     'onclick' => '
 if(this.checked) {
     $("#ical_url").removeClass("hidden");
@@ -1914,7 +1913,7 @@ else {
 }'
                 ));
                 $formfields['is_ical'] = array(
-                    'label' => $this->cal->gettext('calendar_is_ical'),
+                    'label' => $this->cal->gettext('calendar_ical_file'),
                     'value' => $is_ical->show(null),
                     'class' => 'hidden'
                 );
@@ -1924,7 +1923,6 @@ else {
                     'id' => 'ical_url',
                     'class' => 'hidden'
                 ));
-
 
                 $caldav_url = new html_select([
                     'name' => 'source_id',
@@ -1939,8 +1937,19 @@ else {
                 );
             }
             else {
-                $this->rc->output->show_message($this->cal->gettext('nosources_error'), 'error');
-                return null;
+                $ical_url = new html_inputfield( array(
+                    'name' => 'ical_url',
+                    'size' => 20,
+                ));
+                $formfields['url'] = array(
+                    'label' => $this->cal->gettext('calendar_ical_file'),
+                    'value' => $ical_url->show(null),
+                );
+                $enable_ics = new html_hiddenfield(['name' => 'is_ical', 'value' => 1]);
+                $formfields['hidden'] = array(
+                    'label' => ' ',
+                    'value' =>$enable_ics->show(null),
+                );
             }
         }
 
