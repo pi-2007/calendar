@@ -2953,7 +2953,7 @@ function rcube_calendar_ui(settings)
         $dialog = $('<iframe>').attr('src', rcmail.url('calendar', params)).on('load', function() {
           var contents = $(this).contents();
           contents.find('#calendar-name')
-            .prop('disabled', !calendar.editable)
+            .prop('disabled', !calendar.editable && !calendar.editable_name)
             .val(calendar.editname || calendar.name)
             .select();
           contents.find('#calendar-color')
@@ -3607,7 +3607,7 @@ function rcube_calendar_ui(settings)
       if (node && node.id && me.calendars[node.id]) {
         me.select_calendar(node.id, true);
         rcmail.enable_command('calendar-edit', 'calendar-showurl', 'calendar-showfburl', true);
-        rcmail.enable_command('calendar-delete', me.calendars[node.id].editable);
+        rcmail.enable_command('calendar-delete', me.calendars[node.id].editable || me.calendars[node.id].deletable);
         rcmail.enable_command('calendar-remove', me.calendars[node.id] && me.calendars[node.id].removable);
       }
     });
