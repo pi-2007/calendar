@@ -2047,14 +2047,13 @@ else {
                         preg_match('/#(.)(.)(.)/', $value, $matches);
                         $color = $matches[1] .$matches[1] .
                             $matches[2] .$matches[2] .
-                            $matches[3] .$matches[3] .
-                            'ff';
+                            $matches[3] .$matches[3];
                         break;
                     case 7:
-                        $color = substr($value, 1) . 'ff';
+                        $color = substr($value, 1);
                         break;
                     case 9:
-                        $color = substr($value, 1);
+                        $color = substr($value, 1, 6);
                         break;
                     }
                 }
