@@ -141,7 +141,6 @@ class caldav_driver extends calendar_driver
 
                 if($arr['is_ical']) {
                     $this->sync_clients[$arr['id']] = new ical_sync($arr);
-                    $arr["readonly"] = true;
                     $arr["editable"] = false;
                     $arr["deletable"] = true;
                     $arr["editable_name"] = true;
@@ -186,16 +185,16 @@ class caldav_driver extends calendar_driver
 
             if (empty($active) || !in_array($id, $hidden)) {
                 $calendars[$id] = array(
-                    'id'         => $id,
-                    'name'       => $this->cal->gettext('birthdays'),
-                    'listname'   => $this->cal->gettext('birthdays'),
-                    'color'      => $prefs['color'],
-                    'showalarms' => (bool)$this->rc->config->get('calendar_birthdays_alarm_type'),
-                    'active'     => !in_array($id, $hidden),
-                    'group'      => 'x-birthdays',
-                    'editable'  => false,
-                    'default'    => false,
-                    'children'   => false,
+                    'id'            => $id,
+                    'name'          => $this->cal->gettext('birthdays'),
+                    'listname'      => $this->cal->gettext('birthdays'),
+                    'color'         => $prefs['color'],
+                    'showalarms'    => (bool)$this->rc->config->get('calendar_birthdays_alarm_type'),
+                    'active'        => !in_array($id, $hidden),
+                    'group'         => 'x-birthdays',
+                    'editable'      => false,
+                    'default'       => false,
+                    'children'      => false,
                 );
             }
         }
@@ -880,17 +879,18 @@ class caldav_driver extends calendar_driver
         }
 
         // compose vcalendar-style recurrencue rule from structured data
-        $rrule = $event['recurrence'] ? libcalendaring::to_rrule($event['recurrence']) : '';
+        $rrule = !empty($event['recurrence']) ? libcalendaring::to_rrule($event['recurrence']) : '';
+
+        $sensitivity = strtolower($event['sensitivity']);
+        $free_busy   = strtolower($event['free_busy']);
+
         $event['_recurrence'] = rtrim($rrule, ';');
-        $event['free_busy'] = intval($this->free_busy_map[strtolower($event['free_busy'])]);
-        $event['sensitivity'] = intval($this->sensitivity_map[strtolower($event['sensitivity'])]);
+        $event['free_busy']   = isset($this->free_busy_map[$free_busy]) ? $this->free_busy_map[$free_busy] : null;
+        $event['sensitivity'] = isset($this->sensitivity_map[$sensitivity]) ? $this->sensitivity_map[$sensitivity] : null;
+        $event['all_day']     = !empty($event['allday']) ? 1 : 0;
 
         if ($event['free_busy'] == 'tentative') {
             $event['status'] = 'TENTATIVE';
-        }
-
-        if (isset($event['allday'])) {
-            $event['all_day'] = $event['allday'] ? 1 : 0;
         }
 
         // compute absolute time to notify the user
@@ -1897,11 +1897,11 @@ class caldav_driver extends calendar_driver
                 'SELECT source_id, caldav_url FROM '.$this->db_sources .' WHERE user_id = ?',
                 $this->rc->user->ID
             );
+            $sources_exist = $this->rc->db->num_rows($result);
             if($this->rc->db->num_rows($result)) {
                 $is_ical = new html_checkbox( array(
                     'name' => "is_ical",
                     'value' => 1,
-                    'onload' => 'alert(123)',
                     'onclick' => '
 if(this.checked) {
     $("#ical_url").removeClass("hidden");
@@ -1913,7 +1913,7 @@ else {
 }'
                 ));
                 $formfields['is_ical'] = array(
-                    'label' => $this->cal->gettext('calendar_is_ical'),
+                    'label' => $this->cal->gettext('calendar_ical_file'),
                     'value' => $is_ical->show(null),
                     'class' => 'hidden'
                 );
@@ -1923,7 +1923,6 @@ else {
                     'id' => 'ical_url',
                     'class' => 'hidden'
                 ));
-
 
                 $caldav_url = new html_select([
                     'name' => 'source_id',
@@ -1938,8 +1937,19 @@ else {
                 );
             }
             else {
-                $this->rc->output->show_message($this->cal->gettext('nosources_error'), 'error');
-                return null;
+                $ical_url = new html_inputfield( array(
+                    'name' => 'ical_url',
+                    'size' => 20,
+                ));
+                $formfields['url'] = array(
+                    'label' => $this->cal->gettext('calendar_ical_file'),
+                    'value' => $ical_url->show(null),
+                );
+                $enable_ics = new html_hiddenfield(['name' => 'is_ical', 'value' => 1]);
+                $formfields['hidden'] = array(
+                    'label' => ' ',
+                    'value' =>$enable_ics->show(null),
+                );
             }
         }
 
@@ -2047,14 +2057,13 @@ else {
                         preg_match('/#(.)(.)(.)/', $value, $matches);
                         $color = $matches[1] .$matches[1] .
                             $matches[2] .$matches[2] .
-                            $matches[3] .$matches[3] .
-                            'ff';
+                            $matches[3] .$matches[3];
                         break;
                     case 7:
-                        $color = substr($value, 1) . 'ff';
+                        $color = substr($value, 1);
                         break;
                     case 9:
-                        $color = substr($value, 1);
+                        $color = substr($value, 1, 6);
                         break;
                     }
                 }

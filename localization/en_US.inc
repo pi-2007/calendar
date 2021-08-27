@@ -13,9 +13,8 @@ $labels = array();
 //caldav driver
 $labels['addsources'] = 'Add CalDAV sources';
 $labels['deletesources'] = 'Delete CalDAV sources';
-$labels['nosources_error'] = 'No CalDAV sources available.';
 $labels['source_notadded_error'] = 'CalDAV source could not be added.';
-$labels['calendar_is_ical'] = 'Is ics file';
+$labels['calendar_ical_file'] = 'ics file';
 
 // preferences
 $labels['default_view'] = 'Default view';

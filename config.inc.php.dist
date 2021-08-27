@@ -30,13 +30,13 @@ $config['calendar_driver'] = "caldav";
 
 // Enable debugging output for iCAL/CalDAV drivers
 $config['calendar_caldav_debug'] = false;
-$config['calendar_ical_debug'] = false;
 
 // default calendar view (agendaDay, agendaWeek, month)
 $config['calendar_default_view'] = "agendaWeek";
 
 // show a birthdays calendar from the user's address book(s)
 $config['calendar_contact_birthdays'] = false;
+$config['birthday_calendar'] = array('color' => 'fffb00');
 
 // timeslots per hour (1, 2, 3, 4, 6)
 $config['calendar_timeslots'] = 2;
