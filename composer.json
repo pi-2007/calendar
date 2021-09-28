@@ -30,7 +30,7 @@
     "require": {
         "php": ">=5.5",
         "roundcube/plugin-installer": ">=0.1.3",
-        "jodlidev/libcalendaring": ">=3.4.0",
+        "jodlidev/libcalendaring": "master",
         "kolab/libkolab": ">=3.4.0",
         "sabre/dav": ">=4.1.5"
     },
