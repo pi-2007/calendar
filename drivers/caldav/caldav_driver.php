@@ -363,7 +363,7 @@ class caldav_driver extends calendar_driver
             $prop['showalarms']?1:0,
             $prop['caldav_url'],
             isset($prop["caldav_tag"]) ? $prop["caldav_tag"] : null,
-            !!$prop['is_ical']
+            $prop['is_ical']?1:0
         );
 
         if ($result)

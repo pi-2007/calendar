@@ -388,7 +388,11 @@ class caldav_client extends Sabre\DAV\Client
 </C:mkcalendar>";
 
         $response = $this->request('MKCALENDAR', $path, $body, $headers);
-        return $response["statusCode"] === 201;
+        if($response['statusCode'] !== 201) {
+            rcmail::console('Could not create calendar. Response:' .print_r($response, true));
+            return false;
+        }
+        return true;
     }
 
     public function delete_calendar() {

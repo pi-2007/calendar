@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `caldav_sources` (
 CREATE TABLE IF NOT EXISTS `caldav_calendars` (
     `calendar_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` int(10) UNSIGNED NOT NULL DEFAULT '0',
-    `source_id` int(10) UNSIGNED NOT NULL DEFAULT '0',
+    `source_id` int(10) UNSIGNED DEFAULT NULL,
     `name` varchar(255) NOT NULL,
     `color` varchar(8) NOT NULL,
     `showalarms` tinyint(1) NOT NULL DEFAULT '1',

@@ -41,7 +41,7 @@ CREATE SEQUENCE caldav_calendars_seq;
 CREATE TABLE IF NOT EXISTS caldav_calendars (
                                                 calendar_id int CHECK (calendar_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_calendars_seq'),
     user_id int CHECK (user_id > 0) NOT NULL DEFAULT '0',
-    source_id int CHECK (source_id > 0) NOT NULL DEFAULT '0',
+    source_id int CHECK (source_id > 0) DEFAULT NULL,
     name varchar(255) NOT NULL,
     color varchar(8) NOT NULL,
     showalarms smallint NOT NULL DEFAULT '1',

@@ -47,3 +47,17 @@ So I decided to ditch the "multiple driver" support and keep most changes in the
    - All calendars from a source will be automatically added.
    - Calendars can be created and deleted directly at the CalDAV source.
 - ics support included.
+
+### Installation
+I havent published this as a plugin, so you have to instruct composer to install directly from github. Run the following commands in the roundcubemail folder
+(If you get an error that the "API rate limit" has been exceeded and you need an GitHub OAuth token, just follow the instructions in the console - you will need a GitHub account).
+```
+cd /pathTo/roundcubemail
+
+composer config repositories.calendar vcs https://github.com/JodliDev/calendar
+composer config repositories.libcalendaring vcs https://github.com/JodliDev/libcalendaring
+composer config minimum-stability dev
+composer require kolab/calendar
+
+bin/initdb.sh --dir=plugins/calendar/drivers/caldav/SQL
+```

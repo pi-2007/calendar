@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `caldav_sources` (
 CREATE TABLE IF NOT EXISTS `caldav_calendars` (
     `calendar_id` INTEGER  NOT NULL PRIMARY KEY,
     `user_id` INTEGER  NOT NULL DEFAULT '0',
-    `source_id` INTEGER  NOT NULL DEFAULT '0',
+    `source_id` INTEGER  DEFAULT NULL,
     `name` TEXT NOT NULL,
     `color` TEXT NOT NULL,
     `showalarms` tinyINTEGER NOT NULL DEFAULT '1',
