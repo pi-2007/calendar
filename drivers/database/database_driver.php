@@ -715,6 +715,8 @@ class database_driver extends calendar_driver
             'title', 'description', 'location', 'categories', 'url', 'free_busy', 'priority',
             'sensitivity', 'status', 'attendees', 'alarms', 'notifyat'
         );
+        if(array_key_exists('notifyat', $event) && empty($event['notifyat']))
+            unset($event['notifyat']);
 
         foreach ($set_cols as $col) {
             if (!empty($event[$col]) && is_a($event[$col], 'DateTime')) {

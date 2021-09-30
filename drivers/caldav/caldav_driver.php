@@ -502,6 +502,11 @@ class caldav_driver extends calendar_driver
     {
         //$event = $this->_save_preprocess($event);
 
+        //TODO: proper 4 byte character (eg emoticons) handling
+        //utf8 in mysql only supports 3 byte characters, so this throws an error if there are emoticons in the description.
+        //For now we just remove them. But instead of removing, we should prepare the database for them (by using utf8mb4)
+        $desc = preg_replace('/[\xF0-\xF7].../s', '', strval($event['description']));
+
         $this->rc->db->query(sprintf(
             "INSERT INTO " . $this->db_events . "
        (calendar_id, created, changed, uid, recurrence_id, instance, isexception, %s, %s, all_day, recurrence,
@@ -523,7 +528,7 @@ class caldav_driver extends calendar_driver
             intval($event['all_day']),
             $event['_recurrence'],
             strval($event['title']),
-            strval($event['description']),
+            $desc,
             strval($event['location']),
             join(',', (array)$event['categories']),
             strval($event['url']),
@@ -940,8 +945,13 @@ class caldav_driver extends calendar_driver
                 $sql_set[] = $this->rc->db->quote_identifier($col) . '=' . $this->rc->db->quote($event[$col]->format(self::DB_DATE_FORMAT));
             else if (is_array($event[$col]))
                 $sql_set[] = $this->rc->db->quote_identifier($col) . '=' . $this->rc->db->quote(join(',', $event[$col]));
-            else if (array_key_exists($col, $event))
-                $sql_set[] = $this->rc->db->quote_identifier($col) . '=' . $this->rc->db->quote($event[$col]);
+            else if (array_key_exists($col, $event)) {
+                //TODO: proper 4 byte character (eg emoticons) handling
+                //utf8 in mysql only supports 3 byte characters, so this throws an error if there are emoticons in the description.
+                //For now we just remove them. But instead of removing, we should prepare the database for them (by using utf8mb4)
+                $text = preg_replace('/[\xF0-\xF7].../s', '', $event[$col]);
+                $sql_set[] = $this->rc->db->quote_identifier($col) . '=' . $this->rc->db->quote($text);
+            }
         }
 
         if ($event['_recurrence'])

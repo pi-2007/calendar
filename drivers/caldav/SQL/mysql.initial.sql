@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `caldav_calendars` (
     `calendar_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id` int(10) UNSIGNED NOT NULL DEFAULT '0',
     `source_id` int(10) UNSIGNED DEFAULT NULL,
-    `name` varchar(255) NOT NULL,
+    `name` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
     `color` varchar(8) NOT NULL,
     `showalarms` tinyint(1) NOT NULL DEFAULT '1',
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `caldav_calendars` (
         REFERENCES `users`(`user_id`) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT `fk_caldav_calendars_sources` FOREIGN KEY (`source_id`)
         REFERENCES `caldav_sources`(`source_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) /*!40000 ENGINE=INNODB */ /*!40101 CHARACTER SET utf8 COLLATE utf8_general_ci */;
+) /*!40000 ENGINE=INNODB */ /*!40101 CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 
 CREATE TABLE IF NOT EXISTS `caldav_events` (
     `event_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -70,10 +70,10 @@ CREATE TABLE IF NOT EXISTS `caldav_events` (
     `start` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
     `end` datetime NOT NULL DEFAULT '1000-01-01 00:00:00',
     `recurrence` varchar(255) DEFAULT NULL,
-    `title` varchar(255) NOT NULL,
-    `description` text NOT NULL,
-    `location` varchar(255) NOT NULL DEFAULT '',
-    `categories` varchar(255) NOT NULL DEFAULT '',
+    `title` varchar(255) CHARACTER SET utf8mb4 NOT NULL,
+    `description` text CHARACTER SET utf8mb4 NOT NULL,
+    `location` varchar(255) CHARACTER SET utf8mb4 NOT NULL DEFAULT '',
+    `categories` varchar(255) CHARACTER SET utf8mb4 NOT NULL DEFAULT '',
     `url` varchar(255) NOT NULL DEFAULT '',
     `all_day` tinyint(1) NOT NULL DEFAULT '0',
     `free_busy` tinyint(1) NOT NULL DEFAULT '0',
@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS `caldav_events` (
     INDEX `caldav_calendar_notify_idx` (`calendar_id`,`notifyat`),
     CONSTRAINT `fk_caldav_events_calendar_id` FOREIGN KEY (`calendar_id`)
         REFERENCES `caldav_calendars`(`calendar_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) /*!40000 ENGINE=INNODB */ /*!40101 CHARACTER SET utf8 COLLATE utf8_general_ci */;
+) /*!40000 ENGINE=INNODB */ /*!40101 CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 
 CREATE TABLE IF NOT EXISTS `caldav_attachments` (
     `attachment_id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT,
