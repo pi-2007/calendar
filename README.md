@@ -48,6 +48,12 @@ So I decided to ditch the "multiple driver" support and keep most changes in the
    - Calendars can be created and deleted directly at the CalDAV source.
 - ics support included.
 
+### Why does this need a fork of libcalendaring?
+The original calendar plugin uses sabre/vobject 3.5.3
+In order to be compatible with other plugins (and because version 3.5.3 is ancient), I updated it to version 4.1.5
+The problem is, that sabre/vobject makes use of DateTimeImmutable which libcalendaring does not expect.
+It only needs minor changes to account for that but unfortunately the roundcube-project does not accept pull requests...
+
 ### Installation
 I havent published this as a plugin, so you have to instruct composer to install directly from github. Run the following commands in the roundcubemail folder
 (If you get an error that the "API rate limit" has been exceeded and you need an GitHub OAuth token, just follow the instructions in the console - you will need a GitHub account).
