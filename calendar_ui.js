@@ -2421,9 +2421,8 @@ function rcube_calendar_ui(settings)
         attendees = [];
         for (var data, i=0; i < me.selected_event.attendees.length; i++) {
           data = me.selected_event.attendees[i];
-          if (settings.identity.emails.indexOf(';'+String(data.email).toLowerCase()) >= 0) {
-            //FIXME this can only work if there is a single resource per invitation
-            if (is_this_me(String(data.email).toLowerCase())) {
+          //FIXME this can only work if there is a single resource per invitation
+          if (is_this_me(String(data.email).toLowerCase())) {
             data.status = response.toUpperCase();
             data.rsvp = 0;  // unset RSVP flag
 
