@@ -20,7 +20,7 @@
  */
 
 -- SQLINES LICENSE FOR EVALUATION USE ONLY
-CREATE SEQUENCE caldav_sources_seq;
+CREATE SEQUENCE IF NOT EXISTS caldav_sources_seq;
 
 CREATE TABLE IF NOT EXISTS caldav_sources (
                                               source_id int CHECK (source_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_sources_seq'),
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS caldav_sources (
     ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
 
 -- SQLINES LICENSE FOR EVALUATION USE ONLY
-CREATE SEQUENCE caldav_calendars_seq;
+CREATE SEQUENCE IF NOT EXISTS caldav_calendars_seq;
 
 CREATE TABLE IF NOT EXISTS caldav_calendars (
                                                 calendar_id int CHECK (calendar_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_calendars_seq'),
@@ -61,23 +61,23 @@ CREATE TABLE IF NOT EXISTS caldav_calendars (
     REFERENCES caldav_sources(source_id) ON DELETE CASCADE ON UPDATE CASCADE
     ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
 
-CREATE INDEX caldav_user_name_idx ON caldav_calendars (user_id, name);
+CREATE INDEX IF NOT EXISTS caldav_user_name_idx ON caldav_calendars (user_id, name);
 
 -- SQLINES LICENSE FOR EVALUATION USE ONLY
-CREATE SEQUENCE caldav_events_seq;
+CREATE SEQUENCE IF NOT EXISTS caldav_events_seq;
 
 CREATE TABLE IF NOT EXISTS caldav_events (
     event_id int CHECK (event_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_events_seq'),
     calendar_id int CHECK (calendar_id > 0) NOT NULL DEFAULT '0',
-    recurrence_id int CHECK (recurrence_id > 0) NOT NULL DEFAULT '0',
+    recurrence_id int NOT NULL DEFAULT '0',
     uid varchar(255) NOT NULL DEFAULT '',
     instance varchar(16) NOT NULL DEFAULT '',
     isexception smallint NOT NULL DEFAULT '0',
     created timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
     changed timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
-    sequence int CHECK (sequence > 0) NOT NULL DEFAULT '0',
+    sequence int NOT NULL DEFAULT '0',
     start timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
-    end timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
+    "end" timestamp(0) NOT NULL DEFAULT '1000-01-01 00:00:00',
     recurrence varchar(255) DEFAULT NULL,
     title varchar(255) NOT NULL,
     description text NOT NULL,
@@ -103,12 +103,12 @@ CREATE TABLE IF NOT EXISTS caldav_events (
     REFERENCES caldav_calendars(calendar_id) ON DELETE CASCADE ON UPDATE CASCADE
     ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
 
-CREATE INDEX caldav_uid_idx ON caldav_events (uid);
-CREATE INDEX caldav_recurrence_idx ON caldav_events (recurrence_id);
-CREATE INDEX caldav_calendar_notify_idx ON caldav_events (calendar_id,notifyat);
+CREATE INDEX IF NOT EXISTS caldav_uid_idx ON caldav_events (uid);
+CREATE INDEX IF NOT EXISTS caldav_recurrence_idx ON caldav_events (recurrence_id);
+CREATE INDEX IF NOT EXISTS caldav_calendar_notify_idx ON caldav_events (calendar_id,notifyat);
 
 -- SQLINES LICENSE FOR EVALUATION USE ONLY
-CREATE SEQUENCE caldav_attachments_seq;
+CREATE SEQUENCE IF NOT EXISTS caldav_attachments_seq;
 
 CREATE TABLE IF NOT EXISTS caldav_attachments (
                                                   attachment_id int CHECK (attachment_id > 0) NOT NULL DEFAULT NEXTVAL ('caldav_attachments_seq'),
@@ -122,4 +122,4 @@ CREATE TABLE IF NOT EXISTS caldav_attachments (
     REFERENCES caldav_events(event_id) ON DELETE CASCADE ON UPDATE CASCADE
     ) /* SQLINES DEMO *** DB */ /* SQLINES DEMO *** ET utf8 COLLATE utf8_general_ci */;
 
-REPLACE INTO `system` (name, value) SELECT ('calendar-caldav-version', '2021082400');
+INSERT INTO system (name, value) VALUES ('calendar-caldav-version', '2021082400') ON CONFLICT (name) DO UPDATE SET value = excluded.value;
