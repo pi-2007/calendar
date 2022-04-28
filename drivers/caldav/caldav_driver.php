@@ -302,6 +302,9 @@ class caldav_driver extends calendar_driver
     {
         $source['caldav_url'] = self::_encode_url($source['caldav_url']);
 
+        $result = $this->rc->db->query("SELECT user_id, caldav_url, caldav_user FROM " . $this->db_sources . " WHERE user_id=? AND caldav_url=? AND caldav_user=?", $this->rc->user->ID, $source['caldav_url'], $source['caldav_user']);
+        if($this->rc->db->affected_rows($result)) return true;
+
         try {
             $calendars = $this->_autodiscover_calendars($source);
         }
