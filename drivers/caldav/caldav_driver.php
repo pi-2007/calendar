@@ -240,7 +240,7 @@ class caldav_driver extends calendar_driver
             $source['caldav_pass'] = $this->_decrypt_pass($source['caldav_pass']);
 
             $server_url = self::_encode_url($source['caldav_url']);
-            $server_path = parse_url($server_url, PHP_URL_PATH);
+            $server_path = rtrim(parse_url($server_url, PHP_URL_PATH), '/');
             $calId = $this->cal->generate_uid();
             $path = "/calendars/$source[caldav_user]/$calId";
 
