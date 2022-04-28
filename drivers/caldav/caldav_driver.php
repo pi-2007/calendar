@@ -2266,7 +2266,7 @@ else {
     {
         switch ($this->rc->db->db_provider) {
             case 'postgres':
-                return "EXTRACT (EPOCH FROM $field)";
+                return "EXTRACT (EPOCH FROM $field::timestamp without time zone)";
             default:
                 return "UNIX_TIMESTAMP($field)";
         }
