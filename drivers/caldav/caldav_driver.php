@@ -945,6 +945,8 @@ class caldav_driver extends calendar_driver
                 $sql_set[] = $this->rc->db->quote_identifier($col) . '=' . $this->rc->db->quote($event[$col]->format(self::DB_DATE_FORMAT));
             else if (is_array($event[$col]))
                 $sql_set[] = $this->rc->db->quote_identifier($col) . '=' . $this->rc->db->quote(join(',', $event[$col]));
+            else if (array_key_exists($col, $event) && is_null($event[$col]))
+                $sql_set[] = $this->rc->db->quote_identifier($col) . '=NULL';
             else if (array_key_exists($col, $event)) {
                 //TODO: proper 4 byte character (eg emoticons) handling
                 //utf8 in mysql only supports 3 byte characters, so this throws an error if there are emoticons in the description.
