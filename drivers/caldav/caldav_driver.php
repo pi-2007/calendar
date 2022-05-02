@@ -110,7 +110,7 @@ class caldav_driver extends calendar_driver
      */
     protected function _setup_preinstalled_sources()
     {
-        $preinstalled_sources = $this->rc->config->get('calendar_preinstalled_sources', FALSE);
+        $preinstalled_sources = $this->rc->config->get('calendar_caldav_preinstalled_sources', FALSE);
         if ($preinstalled_sources && is_array($preinstalled_sources)) {
             $username = $this->rc->get_user_name();
             $password = $this->rc->get_user_password();

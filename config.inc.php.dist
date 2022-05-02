@@ -143,6 +143,20 @@ $config['kolab_invitation_calendars'] = false;
 // %i - Calendar UUID
 // $config['calendar_caldav_url'] = 'http://%h/iRony/calendars/%u/%i';
 
+// List of CalDAV sources that should be allready installed.
+// They will be added when the calendar section is accessed for the first time by a user.
+// For 'caldav_user' and 'caldav_url' the following replacement variables are supported:
+// %u - Current webmail user name
+// For 'caldav_pass' %p is replaced by the current user's password.
+// $config['calendar_caldav_preinstalled_sources'] = array(
+//     'name' => array(
+//         'caldav_user' => '%u',
+//         'caldav_pass' => '%p',
+//         'caldav_url'  => 'https://example.net/dav',
+//         'showAlarms'  => 1
+//     )
+// );
+
 // Driver to provide a resource directory ('ldap' is the only implementation yet).
 // Leave empty or commented to disable resources support.
 // $config['calendar_resources_driver'] = 'ldap';
