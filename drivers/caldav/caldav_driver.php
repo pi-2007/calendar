@@ -269,7 +269,7 @@ class caldav_driver extends calendar_driver
                 if($this->rc->db->affected_rows($result)) continue;
 
                 $cal = array(
-                    'caldav_url' => self::_encode_url($calendar['href']),
+                    'caldav_url' => $calendar['href'],
                     'name' => $calendar['name'],
                     'color' => $calendar['color']
                 );
