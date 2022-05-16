@@ -2177,6 +2177,17 @@ else {
 
         foreach($updates as $update)
         {
+            if($update['remote_event']['allday'])
+            {
+                //caldav has exclusive end dates set to midnight of the next day.
+                //But we need it inclusive, so we just reduce it by an hour:
+
+                $old = $update['remote_event']['end'];
+                $new = new DateTime('now', $old->getTimezone());
+                $new->setTimestamp($old->getTimestamp() - 3600);
+                $update['remote_event']['end'] = $new;
+            }
+
             // local event -> update event
             if(isset($update["local_event"]))
             {
