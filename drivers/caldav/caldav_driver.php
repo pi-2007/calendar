@@ -101,7 +101,39 @@ class caldav_driver extends calendar_driver
         if(self::$debug === null)
             self::$debug = $this->rc->config->get('calendar_caldav_debug', False);
 
+        $this->_setup_preinstalled_sources();
         $this->_read_calendars();
+    }
+
+    /**
+     * Setup preinstalled sources defined in config file
+     */
+    protected function _setup_preinstalled_sources()
+    {
+        $preinstalled_sources = $this->rc->config->get('calendar_caldav_preinstalled_sources', FALSE);
+        if ($preinstalled_sources && is_array($preinstalled_sources)) {
+            $username = $this->rc->get_user_name();
+            $password = $this->rc->get_user_password();
+
+            foreach ($preinstalled_sources as $cal){
+                $url  = $cal['caldav_url'];
+                $user = $cal['caldav_user'];
+                $pass = $cal['caldav_pass'];
+
+                $url  = str_replace('%u', $username, $url);
+                $user = str_replace('%u', $username, $user);
+                $pass = str_replace('%p', $password, $pass);
+
+                $cal['caldav_url']  = $url;
+                $cal['caldav_user'] = $user;
+                $cal['caldav_pass'] = $pass;
+
+                if (!$this->create_source($cal)) {
+                    $error_msg = 'Unable to add default calendars' . ($this->last_error ? ': ' . $this->last_error :'');
+                    $this->rc->output->show_message($error_msg, 'error');
+                }
+            }
+        }
     }
 
     /**
@@ -301,6 +333,10 @@ class caldav_driver extends calendar_driver
     public function create_source($source)
     {
         $source['caldav_url'] = self::_encode_url($source['caldav_url']);
+
+        // Skip already exiting sources
+        $result = $this->rc->db->query("SELECT user_id, caldav_url, caldav_user FROM " . $this->db_sources . " WHERE user_id=? AND caldav_url=? AND caldav_user=?", $this->rc->user->ID, $source['caldav_url'], $source['caldav_user']);
+        if($this->rc->db->affected_rows($result)) return true;
 
         try {
             $calendars = $this->_autodiscover_calendars($source);
